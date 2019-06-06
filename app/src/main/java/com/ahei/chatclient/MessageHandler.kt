@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import org.greenrobot.eventbus.EventBus
+import java.util.concurrent.TimeUnit
 
 class MessageHandler: SimpleChannelInboundHandler<String>(){
 
@@ -22,6 +23,19 @@ class MessageHandler: SimpleChannelInboundHandler<String>(){
             EventBus.getDefault().post(Message(uid, text))
         }
 
+    }
+
+    /*
+    try to reconnect when channel broken
+     */
+    override fun channelUnregistered(ctx: ChannelHandlerContext) {
+        LOGGER.warn("$UID unregistered")
+
+        ctx.channel().eventLoop().schedule(object: Runnable{
+            override fun run() {
+                Client.connect()
+            }
+        }, Client.CONNECT_DELAY, TimeUnit.SECONDS)
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {

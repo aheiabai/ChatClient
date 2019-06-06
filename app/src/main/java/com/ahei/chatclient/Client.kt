@@ -1,50 +1,38 @@
 package com.ahei.chatclient
 
-import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
+
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
 
-class Client(btn: ImageButton, text: EditText) : View.OnClickListener {
+object Client {
+    private const val HOST = "106.13.103.14"
+    private const val PORT = 8080
+    const val CONNECT_DELAY: Long = 7
+    private val bootstrap: Bootstrap = Bootstrap()
+    var channel: Channel? = null
 
-
-    private val host = "106.13.103.14"
-    private val port = 8080
-    private val btnSend = btn
-    private val etMsg = text
-    private lateinit var channel: Channel
+    fun connect() {
+        channel = bootstrap.connect(HOST, PORT).sync().channel() //connect
+    }
 
     fun run() {
         val workerGroup = NioEventLoopGroup()
 
-        val boot = Bootstrap()
-        boot.group(workerGroup)
+        bootstrap.group(workerGroup)
             .channel(NioSocketChannel::class.java)
             .option(ChannelOption.SO_KEEPALIVE, true)
             .handler(ClientInitializer())
 
-        channel = boot.connect(host, port).sync().channel() //connect
-
-        btnSend.setOnClickListener(this)
+        connect()
 
 
-        channel.closeFuture().sync() // shutdown
-
-        workerGroup.shutdownGracefully()
+//        channel.closeFuture().sync() // shutdown
+//        workerGroup.shutdownGracefully()
     }
 
-    override fun onClick(v: View?) {
-        var msg = etMsg.text.toString().trim()
-        if (msg.isNotEmpty()) {
-            etMsg.setText("")
-            msg += "\r\n"
-            channel.writeAndFlush(msg)
-        }
-    }
+
 }
 

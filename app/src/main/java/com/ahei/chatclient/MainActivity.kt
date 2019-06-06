@@ -13,8 +13,9 @@ import com.ahei.chatclient.model.Message
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import org.slf4j.LoggerFactory
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private lateinit var btnSend: ImageButton
     private lateinit var etMsg: EditText
@@ -34,10 +35,23 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = linearLayoutManager
         recyclerView.adapter = adapter
 
+        btnSend.setOnClickListener(this)
+        if (Client.channel == null) {
+            Thread(Runnable { Client.run() }).start()
+        }
+    }
 
-        val client = Client(btnSend, etMsg)
-        Thread(Runnable { client.run() }).start()
-
+    override fun onClick(v: View?) {
+        if(Client.channel?.isRegistered!!){
+            var msg = etMsg.text.toString().trim()
+            if (msg.isNotEmpty()) {
+                etMsg.setText("")
+                msg += "\r\n"
+                Client.channel?.writeAndFlush(msg)
+            }
+        }else{
+            Toast.makeText(this, "Connection lost", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onStart() {
@@ -47,6 +61,10 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
+    }
+
+    override fun onBackPressed() {
+        moveTaskToBack(true)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

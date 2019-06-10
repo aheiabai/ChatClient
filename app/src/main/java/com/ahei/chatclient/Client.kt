@@ -9,6 +9,7 @@ import io.netty.channel.socket.nio.NioSocketChannel
 
 object Client {
     private const val HOST = "106.13.103.14"
+//    private const val HOST = "192.168.0.112"
     private const val PORT = 8080
     const val CONNECT_DELAY: Long = 7
     private val bootstrap: Bootstrap = Bootstrap()

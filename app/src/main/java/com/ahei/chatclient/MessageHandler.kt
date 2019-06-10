@@ -1,9 +1,7 @@
 package com.ahei.chatclient
 
 
-import android.widget.Toast
 import com.ahei.chatclient.model.Message
-import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import org.greenrobot.eventbus.EventBus
@@ -11,10 +9,16 @@ import java.util.concurrent.TimeUnit
 
 class MessageHandler: SimpleChannelInboundHandler<String>(){
 
-    override fun channelRead0(ctx: ChannelHandlerContext?, msg: String) {
+    override fun channelActive(ctx: ChannelHandlerContext) {
+        ctx.writeAndFlush("--UID $UID\r\n")
+    }
+    override fun channelRead0(ctx: ChannelHandlerContext, msg: String) {
         if(msg.startsWith("Welcome ", false)){
             UID = msg.substring(8, msg.length - 1)
             EventBus.getDefault().post(ChatMessageEvent("You are $UID"))
+        }else if(msg.startsWith("Online ", false)){
+            ONLINE_NUMBER = msg.substring(7, msg.length).toInt()
+            EventBus.getDefault().post(Integer(ONLINE_NUMBER))
         }else{
             val index1 = msg.indexOf(' ')
             val index2 = msg.indexOf(' ', index1 + 1)

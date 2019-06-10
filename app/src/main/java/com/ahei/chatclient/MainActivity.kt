@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onStart() {
         super.onStart()
+        linearLayoutManager.scrollToPosition(msgList.size - 1)
     }
 
     override fun onDestroy() {
@@ -77,6 +78,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         msgList.add(event)
         adapter.notifyDataSetChanged()
         linearLayoutManager.scrollToPosition(msgList.size - 1)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun updateOnlineNumber(number: Integer){
+        this.title = number.toString()
     }
 }
 

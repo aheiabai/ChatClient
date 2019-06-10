@@ -9,3 +9,4 @@ val DECODER = StringDecoder()
 val ENCODER = StringEncoder()
 
 var UID = ""
+var ONLINE_NUMBER = 0
